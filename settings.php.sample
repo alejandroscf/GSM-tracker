@@ -12,7 +12,8 @@
     global $height;
     global $width;
     #Change this! Just to prevent random people from being able to change your displayed location
-    $secretKey = '4fkw8vxp';
+    $secretKey = 'CHANGE ME!';
+    $OpenCellIDkey = 'CHANGE ME!';
     #used to round the lat/lon values so you aren't sharing your *exact* location
     $accuracy = 2; 
     $workingDirectory = '/tmp/';
