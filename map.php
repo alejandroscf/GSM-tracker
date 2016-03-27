@@ -31,12 +31,12 @@
 
 </head>
 <body>
-    <h3><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h3>
-    <h2>Battery: <?=$info['soc']?> %; (<?=$info['vcell']?> V)</h2>
-    <h2>MCC: <?=$info['mcc']?></h2>
-    <h2>MNC: <?=$info['mnc']?></h2>
-    <h2>LAC: <?=$info['lac']?></h2>
-    <h2>CI: <?=$info['ci']?></h2>
+    <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
+    <h3>Battery: <?=$info['soc']?> % (<?=$info['vcell']?> V)</h3>
+    <h3>MCC: <?=$info['mcc']?></h3>
+    <h3>MNC: <?=$info['mnc']?></h3>
+    <h3>LAC: <?=$info['lac']?></h3>
+    <h3>CI: <?=$info['ci']?></h3>
     <!-- <iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?=$embedUrl?>" style="border: 1px solid black"></iframe> -->
     <div id="map" style="width: <?=$width?>px; height: <?=$height?>px"></div>
     <br/>
