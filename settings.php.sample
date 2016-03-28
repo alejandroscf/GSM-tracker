@@ -14,6 +14,7 @@
     #Change this! Just to prevent random people from being able to change your displayed location
     $secretKey = 'CHANGE ME!';
     $OpenCellIDkey = 'CHANGE ME!';
+    $MSLkey = 'CHANGE ME!';
     #used to round the lat/lon values so you aren't sharing your *exact* location
     $accuracy = 2; 
     $workingDirectory = '/tmp/';
@@ -27,7 +28,7 @@
 
     $name = 'Toby';
     #how far to zoom in on the map
-    $zoom = "8";
+    $zoom = "15";
     $height = "500";
     $width = "600";
 ?>
