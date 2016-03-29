@@ -1,3 +1,6 @@
 [submodule "leaflet-omnivore"]
 	path = leaflet-omnivore
 	url = https://github.com/mapbox/leaflet-omnivore
+[submodule "Chart.js"]
+	path = Chart.js
+	url = https://github.com/nnnick/Chart.js
