@@ -111,11 +111,13 @@
     <script type="text/javascript" src="leaflet/leaflet.js"></script>
     <script type="text/javascript" src="leafletembed.js"></script>
     <script type="text/javascript" src="leaflet-omnivore/leaflet-omnivore.min.js"></script>
+    <script type="text/javascript" src="Chart.js/Chart.js"></script>
 
 </head>
 <body>
     <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
     <h3>Battery: <?=$info['soc']?> % (<?=$info['vcell']?> V)</h3>
+    <canvas id="myChart" width="100" height="100"></canvas>
     <h3>MCC: <?=$mcc?></h3>
     <h3>MNC: <?=$mnc?></h3>
     <h3>LAC: <?=$lac?></h3>
@@ -141,6 +143,24 @@
             };
             ?>  
             //omnivore.gpx('s2g.php?file=tmplocation.log').addTo(map);
+
+            // Charts.js
+            var ctx = document.getElementById("myChart").getContext("2d");
+            var data = [
+               {
+                  value: <?=$info['soc']?>,
+                  color: "rgba(0,0,220,0.8)",
+                  highlight: "rgba(0,0,220,1)",
+                  label: "Charge",
+               },
+               {
+                  value: <?=(100-$info['soc'])?>,
+                  color: "rgba(0,0,0,0)",
+                  highlight: "rgba(0,0,0,0)",
+                  label: "Empty",
+               }
+            ]
+            var myPieChart = new Chart(ctx).Pie(data, {showScale: true});
         </script>
 
 </body>
