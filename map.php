@@ -14,6 +14,7 @@
     $lac = $info['lac'];
     $ci = $info['ci'];
     $sig = $info['sig'];
+    $error = NULL;
 
     // Get location from OpenCellID database
     $openCellUrl = 'http://opencellid.org/cell/get';
@@ -25,12 +26,12 @@
 
     $OpenCellXML = file_get_contents($openCellUrl);
     if ($OpenCellXML === FALSE) {
-       $error = "<h3>Failed OpenCellID request $openCellUrl </h3>";
+       $error .= "<h3>Failed OpenCellID request </h3><a href=$openCellUrl>$openCellUrl</a><div>".print_r($http_response_header[0],TRUE)."</div>";
     } else {
        $OpenXmlRsp = new SimpleXMLElement($OpenCellXML);
-       $lat = $OpenXmlRsp->cell[0]['lat'];
-       $lon = $OpenXmlRsp->cell[0]['lon'];
-       $range = $OpenXmlRsp->cell[0]['range'];
+       $Openlat = $OpenXmlRsp->cell[0]['lat'];
+       $Openlon = $OpenXmlRsp->cell[0]['lon'];
+       $Openrange = $OpenXmlRsp->cell[0]['range'];
     }
 
     // Get location from Mozzilla Location Service (MSL)
@@ -61,7 +62,8 @@
     $MSLjson = file_get_contents($MSLUrl,false,$MSLcontext);
     //$MSLjson = file_get_contents($MSLUrl);
     if ($MSLjson === FALSE) {
-       $error = "<h3>Failed MSL request $MSLUrl </h3></br><div>$MSLBody</div>";
+       $error .= "<h3>Failed MSL request $MSLUrl </h3></br><div>$MSLBody</div>";
+       $error .= "<div>".print_r($http_response_header[0],TRUE)."</div>";
     } else {
        $MSLjsonRsp = json_decode($MSLjson);
        $MSLlat = $MSLjsonRsp->location->lat;
@@ -69,6 +71,25 @@
        $MSLrange = $MSLjsonRsp->accuracy;
     }
     
+    if (isset($Openlat)) { 
+       $lat = $Openlat;
+    } elseif (isset($MSLlat)) {
+       $lat = $MSLlat;
+    } else {
+       $error .= "<h3>Error getting location</h3>";
+    }
+
+    if (isset($Openlon)) { 
+       $lon = $Openlon;
+    } elseif (isset($MSLlon)) {
+       $lon = $MSLlon;
+    }
+
+    if (isset($Openrange)) { 
+       $range = $Openrange;
+    } elseif (isset($MSLrange)) {
+       $range = $MSLrange;
+    }
 
     $mapUrl = 'http://www.openstreetmap.org';
     $mapUrl = $mapUrl . "?mlat=$lat&mlon=$lon#map=$zoom/$lat/$lon";
@@ -107,13 +128,18 @@
     <small><a href="<?=$mapUrl?>">View Larger Map</a></small>
         <script>
             initmap();
-            var OpenCellMarker = L.marker([<?=$lat?>, <?=$lon?>]).addTo(map);
-            var OpenCellCircle = L.circle([<?=$lat?>, <?=$lon?>], <?=$range?>, {color: 'green'}).addTo(map);
-            OpenCellMarker.bindPopup("OpenCellID:</br>Lat: <?=$lat?></br>Lon: <?=$lon?>");
-            var MSLMarker = L.marker([<?=$MSLlat?>, <?=$MSLlon?>]).addTo(map);
-            var MSLCircle = L.circle([<?=$MSLlat?>, <?=$MSLlon?>], <?=$MSLrange?>, {color: 'orange'}).addTo(map);
-            MSLMarker.bindPopup("MSL:</br>Lat: <?=$MSLlat?></br>Lon: <?=$MSLlon?>");
-            map.setView(new L.LatLng(<?=$lat?>, <?=$lon?>),<?=$zoom?>);
+            <?php
+            if (isset($lat, $lon, $range)) { 
+               if (isset($Openlat, $Openlon)) echo "var OpenCellMarker = L.marker([$Openlat, $Openlon]).addTo(map);
+               var OpenCellCircle = L.circle([$Openlat, $Openlon], $range, {color: 'green'}).addTo(map);
+               OpenCellMarker.bindPopup('OpenCellID:</br>Lat: $Openlat</br>Lon: $Openlon');\n";
+               if (isset($MSLlat, $MSLlon)) echo "var MSLMarker = L.marker([$MSLlat, $MSLlon]).addTo(map);
+               var MSLCircle = L.circle([$MSLlat, $MSLlon], $MSLrange, {color: 'orange'}).addTo(map);
+               MSLMarker.bindPopup('MSL:</br>Lat: $MSLlat</br>Lon: $MSLlon');\n";
+               echo "map.setView(new L.LatLng($lat, $lon),$zoom);
+";
+            };
+            ?>  
             //omnivore.gpx('s2g.php?file=tmplocation.log').addTo(map);
         </script>
 
