@@ -20,17 +20,12 @@
 
     $loc_string = file_get_contents($filePath);
     $old = unserialize($loc_string);
-    //$diff = round(abs($info['timestamp']-$old['timestamp'])/1000);
-    $newPath = $gpxDirectory . date("Y-m-d-H-i-s",round($old['timestamp']/1000)) . $logName;
-    // TODO: Separa el fichero si han pasado ¿24? horas
-    /*if ($diff > 60) {
+    $newPath = $gpxDirectory . date("Y-m-d",round($old['timestamp']/1000)) . $logName;
+    // Separa el fichero si han pasado 24 horas
+    if (date("d",round($old['timestamp']/1000)) != date("d")) {
+       copy($logPath, $logPath . ".old");
        rename($logPath, $newPath);
-       //TODO Create GPX file
-       s2g($newPath,$outString);
-       $fh = fopen(str_replace(".log","",$newPath).".gpx", 'w');
-       fwrite($fh, $outString);
-       fclose($fh);
-    }*/
+    }
     $fh = fopen($logPath, 'a');
     fwrite($fh, serialize($info) . "\n");
     fclose($fh);
