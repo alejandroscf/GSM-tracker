@@ -15,6 +15,7 @@
     $ci = $info['ci'];
     $sig = $info['sig'];
     $error = NULL;
+    $soc = $info['soc'];
 
     // Get location from OpenCellID database
     $openCellUrl = 'http://opencellid.org/cell/get';
@@ -116,8 +117,9 @@
 </head>
 <body>
     <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
-    <h3>Battery: <?=$info['soc']?> % (<?=$info['vcell']?> V)</h3>
-    <canvas id="myChart" width="100" height="100"></canvas>
+    <h3>Battery: <?=isset($soc)?$soc."% (".$info['vcell']." V)</h3>
+    <canvas id=\"myChart\" width=\"100\" height=\"100\"></canvas>
+    ":"No information available</h3>"?></h3>
     <h3>MCC: <?=$mcc?> MNC: <?=$mnc?> LAC: <?=$lac?> CI: <?=$ci?> RSSI: <?=$sig?></h3>
     <?=$error?>
     <!-- <iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?=$embedUrl?>" style="border: 1px solid black"></iframe> -->
@@ -144,13 +146,13 @@
             var ctx = document.getElementById("myChart").getContext("2d");
             var data = [
                {
-                  value: <?=$info['soc']?>,
+                  value: <?=isset($soc)?$soc:"0"?>,
                   color: "rgba(0,0,220,0.8)",
                   highlight: "rgba(0,0,220,1)",
                   label: "Charge",
                },
                {
-                  value: <?=(100-$info['soc'])?>,
+                  value: <?=(100-$soc)?>,
                   color: "rgba(0,0,0,0)",
                   highlight: "rgba(0,0,0,0)",
                   label: "Empty",
