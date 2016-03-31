@@ -43,12 +43,13 @@
       array (
        'cellTowers' => array (array(
         'radioType' => "gsm",
-        'mobileCountryCode' => "214",
-        'mobileNetworkCode' => "7",
-        'locationAreaCode' => "5006",
-        'cellId' => "6563",
-        'signalStrength' => "-63"
-       ))
+        'mobileCountryCode' => "$mcc",
+        'mobileNetworkCode' => "$mnc",
+        'locationAreaCode' => "$lac",
+        'cellId' => "$ci",
+        'signalStrength' => "$sig"
+       )
+       )
       )
     );
 
