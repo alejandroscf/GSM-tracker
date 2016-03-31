@@ -134,7 +134,7 @@
             if (isset($lat, $lon, $range)) { 
                if (isset($Openlat, $Openlon)) echo "var OpenCellMarker = L.marker([$Openlat, $Openlon]).addTo(map);
                var OpenCellCircle = L.circle([$Openlat, $Openlon], $range, {color: 'green'}).addTo(map);
-               OpenCellMarker.bindPopup('OpenCellID:</br>Lat: $Openlat</br>Lon: $Openlon');\n";
+               OpenCellMarker.bindPopup('<a href=\"http://opencellid.org/#action=filters.measuresOfGivenBaseStation&mcc=$mcc&mnc=$mnc&lac=$lac&cellid=$ci\" target=\"_blank\">OpenCellID</a>:</br>Lat: $Openlat</br>Lon: $Openlon');\n";
                if (isset($MSLlat, $MSLlon)) echo "var MSLMarker = L.marker([$MSLlat, $MSLlon]).addTo(map);
                var MSLCircle = L.circle([$MSLlat, $MSLlon], $MSLrange, {color: 'orange'}).addTo(map);
                MSLMarker.bindPopup('MSL:</br>Lat: $MSLlat</br>Lon: $MSLlon');\n";
