@@ -118,11 +118,7 @@
     <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
     <h3>Battery: <?=$info['soc']?> % (<?=$info['vcell']?> V)</h3>
     <canvas id="myChart" width="100" height="100"></canvas>
-    <h3>MCC: <?=$mcc?></h3>
-    <h3>MNC: <?=$mnc?></h3>
-    <h3>LAC: <?=$lac?></h3>
-    <h3>CI: <?=$ci?></h3>
-    <h3>RSSI: <?=$sig?></h3>
+    <h3>MCC: <?=$mcc?> MNC: <?=$mnc?> LAC: <?=$lac?> CI: <?=$ci?> RSSI: <?=$sig?></h3>
     <?=$error?>
     <!-- <iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?=$embedUrl?>" style="border: 1px solid black"></iframe> -->
     <div id="map" style="width: <?=$width?>px; height: <?=$height?>px"></div>
