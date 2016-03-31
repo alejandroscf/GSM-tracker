@@ -1,5 +1,6 @@
 <?php
     include "settings.php";
+    include "gsm.php";
 
     //$loc_string = file_get_contents($filePath);
     //$info = unserialize($loc_string);
@@ -18,79 +19,29 @@
     $soc = $info['soc'];
 
     // Get location from OpenCellID database
-    $openCellUrl = 'http://opencellid.org/cell/get';
-    $openCellUrl = $openCellUrl . "?key=$OpenCellIDkey&radio=GSM&format=xml";
-    $openCellUrl = $openCellUrl . "&mcc=$mcc";
-    $openCellUrl = $openCellUrl . "&mnc=$mnc";
-    $openCellUrl = $openCellUrl . "&lac=$lac";
-    $openCellUrl = $openCellUrl . "&cellid=$ci";
-
-    $OpenCellXML = file_get_contents($openCellUrl);
-    if ($OpenCellXML === FALSE) {
-       $error .= "<h3>Failed OpenCellID request </h3><a href=$openCellUrl>$openCellUrl</a><div>".print_r($http_response_header[0],TRUE)."</div>";
-    } else {
-       $OpenXmlRsp = new SimpleXMLElement($OpenCellXML);
-       $Openlat = $OpenXmlRsp->cell[0]['lat'];
-       $Openlon = $OpenXmlRsp->cell[0]['lon'];
-       $Openrange = $OpenXmlRsp->cell[0]['range'];
-    }
+    $OpenLoc = OpenCellIDquery($mcc, $mnc, $lac, $ci, $sig);
 
     // Get location from Mozzilla Location Service (MSL)
-    $MSLUrl = "https://location.services.mozilla.com/v1/geolocate";
-    $MSLUrl = $MSLUrl . "?key=$MSLkey";
+    $MSLLoc = MSLquery($mcc, $mnc, $lac, $ci, $sig);
     
-    $MSLBody = json_encode(
-      array (
-       'cellTowers' => array (array(
-        'radioType' => "gsm",
-        'mobileCountryCode' => "$mcc",
-        'mobileNetworkCode' => "$mnc",
-        'locationAreaCode' => "$lac",
-        'cellId' => "$ci",
-        'signalStrength' => "$sig"
-       )
-       )
-      )
-    );
-
-    $MSLOpts = array(
-       'http'=>array(
-          'method' => "POST",
-          'content' => $MSLBody
-       )
-    );
-    $MSLcontext = stream_context_create($MSLOpts);
-
-    $MSLjson = file_get_contents($MSLUrl,false,$MSLcontext);
-    //$MSLjson = file_get_contents($MSLUrl);
-    if ($MSLjson === FALSE) {
-       $error .= "<h3>Failed MSL request $MSLUrl </h3></br><div>$MSLBody</div>";
-       $error .= "<div>".print_r($http_response_header[0],TRUE)."</div>";
-    } else {
-       $MSLjsonRsp = json_decode($MSLjson);
-       $MSLlat = $MSLjsonRsp->location->lat;
-       $MSLlon = $MSLjsonRsp->location->lng;
-       $MSLrange = $MSLjsonRsp->accuracy;
-    }
-    
-    if (isset($Openlat)) { 
-       $lat = $Openlat;
-    } elseif (isset($MSLlat)) {
-       $lat = $MSLlat;
+    if (isset($OpenLoc->lat)) { 
+       $lat = $OpenLoc->lat;
+    } elseif (isset($MSLLoc->lat)) {
+       $lat = $MSLLoc->lat;
     } else {
        $error .= "<h3>Error getting location</h3>";
     }
 
-    if (isset($Openlon)) { 
-       $lon = $Openlon;
-    } elseif (isset($MSLlon)) {
-       $lon = $MSLlon;
+    if (isset($OpenLoc->lon)) { 
+       $lon = $OpenLoc->lon;
+    } elseif (isset($MSLLoc->lon)) {
+       $lon = $MSLLoc->lon;
     }
 
-    if (isset($Openrange)) { 
-       $range = $Openrange;
-    } elseif (isset($MSLrange)) {
-       $range = $MSLrange;
+    if (isset($OpenLoc->range)) { 
+       $range = $OpenLoc->range;
+    } elseif (isset($MSLLoc->range)) {
+       $range = $MSLLoc->range;
     }
 
     $mapUrl = 'http://www.openstreetmap.org';
@@ -120,7 +71,7 @@
     <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
     <h3>Battery: <?=isset($soc)?$soc."% (".$info['vcell']." V)</h3>
     <canvas id=\"myChart\" width=\"100\" height=\"100\"></canvas>
-    ":"No information available</h3>"?></h3>
+    ":"No information available</h3>"?>
     <h3>MCC: <?=$mcc?> MNC: <?=$mnc?> LAC: <?=$lac?> CI: <?=$ci?> RSSI: <?=$sig?></h3>
     <?=$error?>
     <!-- <iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?=$embedUrl?>" style="border: 1px solid black"></iframe> -->
@@ -131,12 +82,12 @@
             initmap();
             <?php
             if (isset($lat, $lon, $range)) { 
-               if (isset($Openlat, $Openlon)) echo "var OpenCellMarker = L.marker([$Openlat, $Openlon]).addTo(map);
-               var OpenCellCircle = L.circle([$Openlat, $Openlon], $range, {color: 'green'}).addTo(map);
-               OpenCellMarker.bindPopup('<a href=\"http://opencellid.org/#action=filters.measuresOfGivenBaseStation&mcc=$mcc&mnc=$mnc&lac=$lac&cellid=$ci\" target=\"_blank\">OpenCellID</a>:</br>Lat: $Openlat</br>Lon: $Openlon');\n";
-               if (isset($MSLlat, $MSLlon)) echo "var MSLMarker = L.marker([$MSLlat, $MSLlon]).addTo(map);
-               var MSLCircle = L.circle([$MSLlat, $MSLlon], $MSLrange, {color: 'orange'}).addTo(map);
-               MSLMarker.bindPopup('MSL:</br>Lat: $MSLlat</br>Lon: $MSLlon');\n";
+               if (isset($OpenLoc->lat, $OpenLoc->lon)) echo "var OpenCellMarker = L.marker([$OpenLoc->lat, $OpenLoc->lon]).addTo(map);
+               var OpenCellCircle = L.circle([$OpenLoc->lat, $OpenLoc->lon], $OpenLoc->range, {color: 'green'}).addTo(map);
+               OpenCellMarker.bindPopup('<a href=\"http://opencellid.org/#action=filters.measuresOfGivenBaseStation&mcc=$mcc&mnc=$mnc&lac=$lac&cellid=$ci\" target=\"_blank\">OpenCellID</a>:</br>Lat: $OpenLoc->lat</br>Lon: $OpenLoc->lon');\n";
+               if (isset($MSLLoc->lat, $MSLLoc->lon)) echo "var MSLMarker = L.marker([$MSLLoc->lat, $MSLLoc->lon]).addTo(map);
+               var MSLCircle = L.circle([$MSLLoc->lat, $MSLLoc->lon], $MSLLoc->range, {color: 'orange'}).addTo(map);
+               MSLMarker.bindPopup('MSL:</br>Lat: $MSLLoc->lat</br>Lon: $MSLLoc->lon');\n";
                echo "map.setView(new L.LatLng($lat, $lon),$zoom);
 ";
             };
