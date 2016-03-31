@@ -25,23 +25,23 @@
     $MSLLoc = MSLquery($mcc, $mnc, $lac, $ci, $sig);
     
     if (isset($OpenLoc->lat)) { 
-       $lat = $OpenLoc->lat;
+        $lat = $OpenLoc->lat;
     } elseif (isset($MSLLoc->lat)) {
-       $lat = $MSLLoc->lat;
+        $lat = $MSLLoc->lat;
     } else {
-       $error .= "<h3>Error getting location</h3>";
+        $error .= "<h3>Error getting location</h3>";
     }
 
     if (isset($OpenLoc->lon)) { 
-       $lon = $OpenLoc->lon;
+        $lon = $OpenLoc->lon;
     } elseif (isset($MSLLoc->lon)) {
-       $lon = $MSLLoc->lon;
+        $lon = $MSLLoc->lon;
     }
 
     if (isset($OpenLoc->range)) { 
-       $range = $OpenLoc->range;
+        $range = $OpenLoc->range;
     } elseif (isset($MSLLoc->range)) {
-       $range = $MSLLoc->range;
+        $range = $MSLLoc->range;
     }
 
     $mapUrl = 'http://www.openstreetmap.org';
@@ -78,17 +78,21 @@
     <div id="map" style="width: <?=$width?>px; height: <?=$height?>px"></div>
     <br/>
     <small><a href="<?=$mapUrl?>">View Larger Map</a></small>
+    <?php
+    
+
+    ?>
         <script>
             initmap();
             <?php
             if (isset($lat, $lon, $range)) { 
-               if (isset($OpenLoc->lat, $OpenLoc->lon)) echo "var OpenCellMarker = L.marker([$OpenLoc->lat, $OpenLoc->lon]).addTo(map);
-               var OpenCellCircle = L.circle([$OpenLoc->lat, $OpenLoc->lon], $OpenLoc->range, {color: 'green'}).addTo(map);
-               OpenCellMarker.bindPopup('<a href=\"http://opencellid.org/#action=filters.measuresOfGivenBaseStation&mcc=$mcc&mnc=$mnc&lac=$lac&cellid=$ci\" target=\"_blank\">OpenCellID</a>:</br>Lat: $OpenLoc->lat</br>Lon: $OpenLoc->lon');\n";
-               if (isset($MSLLoc->lat, $MSLLoc->lon)) echo "var MSLMarker = L.marker([$MSLLoc->lat, $MSLLoc->lon]).addTo(map);
-               var MSLCircle = L.circle([$MSLLoc->lat, $MSLLoc->lon], $MSLLoc->range, {color: 'orange'}).addTo(map);
-               MSLMarker.bindPopup('MSL:</br>Lat: $MSLLoc->lat</br>Lon: $MSLLoc->lon');\n";
-               echo "map.setView(new L.LatLng($lat, $lon),$zoom);
+                if (isset($OpenLoc->lat, $OpenLoc->lon)) echo "var OpenCellMarker = L.marker([$OpenLoc->lat, $OpenLoc->lon]).addTo(map);
+                var OpenCellCircle = L.circle([$OpenLoc->lat, $OpenLoc->lon], $OpenLoc->range, {color: 'green'}).addTo(map);
+                OpenCellMarker.bindPopup('<a href=\"http://opencellid.org/#action=filters.measuresOfGivenBaseStation&mcc=$mcc&mnc=$mnc&lac=$lac&cellid=$ci\" target=\"_blank\">OpenCellID</a>:</br>Lat: $OpenLoc->lat</br>Lon: $OpenLoc->lon');\n";
+                if (isset($MSLLoc->lat, $MSLLoc->lon)) echo "var MSLMarker = L.marker([$MSLLoc->lat, $MSLLoc->lon]).addTo(map);
+                var MSLCircle = L.circle([$MSLLoc->lat, $MSLLoc->lon], $MSLLoc->range, {color: 'orange'}).addTo(map);
+                SLMarker.bindPopup('MSL:</br>Lat: $MSLLoc->lat</br>Lon: $MSLLoc->lon');\n";
+                echo "map.setView(new L.LatLng($lat, $lon),$zoom);
 ";
             };
             ?>  
@@ -97,18 +101,18 @@
             // Charts.js
             var ctx = document.getElementById("myChart").getContext("2d");
             var data = [
-               {
-                  value: <?=isset($soc)?$soc:"0"?>,
-                  color: "rgba(0,0,220,0.8)",
-                  highlight: "rgba(0,0,220,1)",
-                  label: "Charge",
-               },
-               {
-                  value: <?=(100-$soc)?>,
-                  color: "rgba(0,0,0,0)",
-                  highlight: "rgba(0,0,0,0)",
-                  label: "Empty",
-               }
+                {
+                    value: <?=isset($soc)?$soc:"0"?>,
+                    color: "rgba(0,0,220,0.8)",
+                    highlight: "rgba(0,0,220,1)",
+                    label: "Charge",
+                },
+                {
+                    value: <?=(100-$soc)?>,
+                    color: "rgba(0,0,0,0)",
+                    highlight: "rgba(0,0,0,0)",
+                    label: "Empty",
+                }
             ]
             var myPieChart = new Chart(ctx).Pie(data, {showScale: true});
         </script>

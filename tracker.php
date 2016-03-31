@@ -23,8 +23,8 @@
     $newPath = $gpxDirectory . date("Y-m-d",round($old['timestamp']/1000)) . $logName;
     // Separa el fichero si han pasado 24 horas
     if (date("d",round($old['timestamp']/1000)) != date("d")) {
-       copy($logPath, $logPath . ".old");
-       rename($logPath, $newPath);
+        copy($logPath, $logPath . ".old");
+        rename($logPath, $newPath);
     }
     $fh = fopen($logPath, 'a');
     fwrite($fh, serialize($info) . "\n");
