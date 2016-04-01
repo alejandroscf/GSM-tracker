@@ -20,9 +20,11 @@
 
     // Get location from OpenCellID database
     $OpenLoc = OpenCellIDquery($mcc, $mnc, $lac, $ci, $sig);
+    $error .= $OpenLoc->error;
 
     // Get location from Mozzilla Location Service (MSL)
     $MSLLoc = MSLquery($mcc, $mnc, $lac, $ci, $sig);
+    $error .= $MSLLoc->error;
     
     if (isset($OpenLoc->lat)) { 
         $lat = $OpenLoc->lat;
@@ -52,6 +54,14 @@
     $embedUrl = 'http://www.openstreetmap.org/export/embed.html';
     $embedUrl = $embedUrl . "?bbox=$bbox&layer=mapnik&marker=$marker"; 
 
+    // Prepare history data
+    $points1 = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $points2 = file($logPath.".old", FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $points = array_merge($points2,$points1);
+    unset($points1);
+    unset($points2);
+
+
    
 ?>
 <html>
@@ -65,23 +75,21 @@
     <script type="text/javascript" src="leafletembed.js"></script>
     <script type="text/javascript" src="leaflet-omnivore/leaflet-omnivore.min.js"></script>
     <script type="text/javascript" src="Chart.js/Chart.js"></script>
+    <script type="text/javascript" src="Chart.Scatter/Chart.Scatter.js"></script>
 
 </head>
 <body>
     <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
     <h3>Battery: <?=isset($soc)?$soc."% (".$info['vcell']." V)</h3>
-    <canvas id=\"myChart\" width=\"100\" height=\"100\"></canvas>
+    <canvas id=\"batteryChart\" width=\"100\" height=\"100\"></canvas>
     ":"No information available</h3>"?>
+    <canvas id="historyChart" width="400" height="400"></canvas>
     <h3>MCC: <?=$mcc?> MNC: <?=$mnc?> LAC: <?=$lac?> CI: <?=$ci?> RSSI: <?=$sig?></h3>
     <?=$error?>
     <!-- <iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?=$embedUrl?>" style="border: 1px solid black"></iframe> -->
     <div id="map" style="width: <?=$width?>px; height: <?=$height?>px"></div>
     <br/>
     <small><a href="<?=$mapUrl?>">View Larger Map</a></small>
-    <?php
-    
-
-    ?>
         <script>
             initmap();
             <?php
@@ -91,7 +99,7 @@
                 OpenCellMarker.bindPopup('<a href=\"http://opencellid.org/#action=filters.measuresOfGivenBaseStation&mcc=$mcc&mnc=$mnc&lac=$lac&cellid=$ci\" target=\"_blank\">OpenCellID</a>:</br>Lat: $OpenLoc->lat</br>Lon: $OpenLoc->lon');\n";
                 if (isset($MSLLoc->lat, $MSLLoc->lon)) echo "var MSLMarker = L.marker([$MSLLoc->lat, $MSLLoc->lon]).addTo(map);
                 var MSLCircle = L.circle([$MSLLoc->lat, $MSLLoc->lon], $MSLLoc->range, {color: 'orange'}).addTo(map);
-                SLMarker.bindPopup('MSL:</br>Lat: $MSLLoc->lat</br>Lon: $MSLLoc->lon');\n";
+                MSLMarker.bindPopup('MSL:</br>Lat: $MSLLoc->lat</br>Lon: $MSLLoc->lon');\n";
                 echo "map.setView(new L.LatLng($lat, $lon),$zoom);
 ";
             };
@@ -99,7 +107,7 @@
             //omnivore.gpx('s2g.php?file=tmplocation.log').addTo(map);
 
             // Charts.js
-            var ctx = document.getElementById("myChart").getContext("2d");
+            var batteryCtx = document.getElementById("batteryChart").getContext("2d");
             var data = [
                 {
                     value: <?=isset($soc)?$soc:"0"?>,
@@ -114,7 +122,36 @@
                     label: "Empty",
                 }
             ]
-            var myPieChart = new Chart(ctx).Pie(data, {showScale: true});
+            var batteryChart = new Chart(batteryCtx).Pie(data, {showScale: true});
+            
+            var historyCtx = document.getElementById("historyChart").getContext("2d");
+            var historyData = [{
+                label: 'Battery level',
+                strokeColor: '#F16220',
+                pointColor: '#F16220',
+                pointStrokeColor: '#fff',
+                data: [
+                <?php
+                // Generate javascript array of battery use
+                for ($i = count($points) - 24*4, $sizePoints = count($points); $i < $sizePoints ; $i++ ) {
+                    $point = unserialize($points[$i]);
+                    if (isset($point["timestamp"],$point["soc"])) {
+                        echo "                {x: " . $point["timestamp"] . ", y: " . $point["soc"] . "},\n";
+                    };
+                };
+
+            ?>
+                ]
+            },
+            ];
+            options = {
+                pointDot: false,
+                bezierCurve: false,
+                scaleType: "date",
+                useUtc: false,
+                animation: false,
+            }
+            var historyChart = new Chart(historyCtx).Scatter(historyData,options);
         </script>
 
 </body>
