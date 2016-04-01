@@ -81,9 +81,9 @@
 <body>
     <h2><?=$name?>'s status as of <?=$minutesAgo?> minutes ago:</h2>
     <h3>Battery: <?=isset($soc)?$soc."% (".$info['vcell']." V)</h3>
-    <canvas id=\"batteryChart\" width=\"100\" height=\"100\"></canvas>
+    <canvas id=\"batteryChart\" width=\"200\" height=\"200\"></canvas>
     ":"No information available</h3>"?>
-    <canvas id="historyChart" width="400" height="400"></canvas>
+    <canvas id="historyChart" width="400" height="200"></canvas>
     <h3>MCC: <?=$mcc?> MNC: <?=$mnc?> LAC: <?=$lac?> CI: <?=$ci?> RSSI: <?=$sig?></h3>
     <?=$error?>
     <!-- <iframe width="<?=$width?>" height="<?=$height?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?=$embedUrl?>" style="border: 1px solid black"></iframe> -->
